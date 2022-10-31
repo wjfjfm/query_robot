@@ -37,6 +37,7 @@ CREATE TABLE robo_command (
 
 CREATE TABLE output (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  time datetime,
   text TEXT
 );
 ```

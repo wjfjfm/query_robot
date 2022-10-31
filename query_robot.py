@@ -62,7 +62,7 @@ class RoboNode:
         return self.__str__()
 
 
-class QueryRobot
+class QueryRobot:
     def __init__(self):
         self.head_node = RoboNode()
         self.head_node.report_interval = -1
@@ -93,8 +93,11 @@ class QueryRobot
 
         if node.if_change and node.if_exist:
             cache = self.result_cache.get(node.id, None)
-            if len(result_dict) > 0 and cache and cache == result_dict:
-                to_report = True
+            if len(result_dict) > 0 :
+                if cache is None:
+                    to_report = True
+                elif cache != result_dict:
+                    to_report = True
 
         elif node.if_exist:
             if len(result_dict) > 0:
@@ -102,7 +105,7 @@ class QueryRobot
 
         elif node.if_change:
             cache = self.result_cache.get(node.id, None)
-            if cache and cache == result_dict:
+            if cache and cache != result_dict:
                 to_report = True
         else:
             to_report = True
@@ -207,7 +210,7 @@ class QueryRobot
         text = ""
         text += "# " + str(node.output) + "\n\n"
         result_json = json.dumps(result_dict, indent=4, default=str)
-        text += "```text\n"
+        text += "```\n"
         text += str(result_json)
         text += "```"
         return text
@@ -215,6 +218,7 @@ class QueryRobot
     def insert_to_output(self, text):
         row = {}
         row["text"] = str(text)
+        row["time"] = str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         self.exe_insert_sql(self.output_conn, self.output_db.table, row)
 
     @staticmethod
@@ -224,7 +228,9 @@ class QueryRobot
         columns = ', '.join(myDict.keys())
         sql = u"INSERT INTO %s ( %s ) VALUES ( %s )" % (table, columns, placeholders)
         # valid in Python 2
-        cursor.execute(sql, myDict.values())
+        # cursor.execute(sql, myDict.values())
+        # Python3
+        cursor.execute(sql, list(myDict.values()))
         row_count = cursor.rowcount
 
         if row_count != 1:
